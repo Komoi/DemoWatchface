@@ -7,6 +7,8 @@
 	<!-- Required to act as a custom watch face. -->
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 
+	<uses-permission android:name="com.google.android.wearable.permission.RECEIVE_COMPLICATION_DATA"/>
+
 	<application
 		android:name=".MeetupWatchfaceApplication"
 		android:allowBackup="true"
@@ -28,12 +30,43 @@
 				android:name="com.google.android.wearable.watchface.preview_circular"
 				android:resource="@drawable/preview_analog"/>
 
+			<meta-data
+				android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+				android:value="com.example.android.wearable.watchface.CONFIG_COMPLICATION"/>
+
 			<intent-filter>
 				<action android:name="android.service.wallpaper.WallpaperService"/>
 
 				<category android:name="com.google.android.wearable.watchface.category.WATCH_FACE"/>
 			</intent-filter>
 		</service>
+
+		<!-- To be able to pick complication for specific slot easily-->
+		<activity android:name="android.support.wearable.complications.ComplicationHelperActivity"/>
+
+		<!-- Activity, which will be registered as configuration one and will enable "settings" icon under watchface -->
+		<activity
+			android:name=".AnalogWatchFaceWearableConfigActivity"
+			android:label="@string/my_analog_name">
+			<!-- old android wear 1.0 configuration intent filter for general settings-->
+		<!--
+			<intent-filter>
+				<action android:name=
+							"com.example.android.wearable.watchface.CONFIG_ANALOG"/>
+				<category android:name=
+							  "com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		  -->
+
+			<!-- new android wear 2.0 configuration intent filter for complication settings-->
+			<intent-filter>
+				<action android:name="com.example.android.wearable.watchface.CONFIG_COMPLICATION"/>
+				<category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+
 
 		<meta-data
 			android:name="com.google.android.gms.version"

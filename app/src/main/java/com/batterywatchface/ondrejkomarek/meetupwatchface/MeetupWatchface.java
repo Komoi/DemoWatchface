@@ -17,6 +17,7 @@
 package com.batterywatchface.ondrejkomarek.meetupwatchface;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -32,9 +33,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.graphics.Palette;
+import android.support.wearable.companion.WatchFaceCompanion;
+import android.support.wearable.complications.ComplicationData;
+import android.support.wearable.complications.ComplicationHelperActivity;
+import android.support.wearable.complications.ProviderChooserIntent;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -51,6 +57,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class MeetupWatchface extends CanvasWatchFaceService {
 
+	public static final String TAG = "MeetupWatchface";
+
 	/*
 	 * Update rate in milliseconds for interactive mode. We update once a second to advance the
      * second hand.
@@ -61,6 +69,11 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 	 * Handler message id for updating the time periodically in interactive mode.
 	 */
 	private static final int MSG_UPDATE_TIME = 0;
+
+	public static final int TOP_COMPLICATION = 0;
+	public static final int BOTTOM_COMPLICATION = 1;
+
+	public static final int[] COMPLICATION_IDS = {TOP_COMPLICATION, BOTTOM_COMPLICATION};
 
 
 	@Override
@@ -196,6 +209,21 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			});
 
 			mCalendar = Calendar.getInstance();
+
+			setActiveComplications(COMPLICATION_IDS);//this starts receiving complication data
+		}
+
+
+
+		@Override
+		public void onComplicationDataUpdate(int watchFaceComplicationId, ComplicationData data) {
+			super.onComplicationDataUpdate(watchFaceComplicationId, data);
+			long now = System.currentTimeMillis();
+			if(data.getShortText() != null) {
+				Toast.makeText(getBaseContext(), "Complication data:" + data.getShortText().getText(getApplicationContext(), now), Toast.LENGTH_SHORT).show();
+			}
+			Log.i(TAG, "Complication data:" + ((data.getShortText() == null) ? "null" : data.getShortText().getText(getApplicationContext(), now)));
+
 		}
 
 
