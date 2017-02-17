@@ -1,4 +1,4 @@
-package com.batterywatchface.ondrejkomarek.meetupwatchface;
+package com.ondrejkomarek.meetupwatchface;
 
 import android.app.Application;
 import android.content.Context;

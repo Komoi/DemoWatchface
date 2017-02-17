@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.batterywatchface.ondrejkomarek.meetupwatchface;
+package com.ondrejkomarek.meetupwatchface;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;

@@ -1,4 +1,4 @@
-package com.batterywatchface.ondrejkomarek.meetupwatchface;
+package com.ondrejkomarek.meetupwatchface;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -12,10 +12,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.BOTTOM_COMPLICATION;
-import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.BOTTOM_COMPLICATION_TYPE;
-import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.TOP_COMPLICATION;
-import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.TOP_COMPLICATION_TYPE;
+import static com.ondrejkomarek.meetupwatchface.MeetupWatchface.BOTTOM_COMPLICATION;
+import static com.ondrejkomarek.meetupwatchface.MeetupWatchface.BOTTOM_COMPLICATION_TYPE;
+import static com.ondrejkomarek.meetupwatchface.MeetupWatchface.TOP_COMPLICATION;
+import static com.ondrejkomarek.meetupwatchface.MeetupWatchface.TOP_COMPLICATION_TYPE;
 
 
 /**

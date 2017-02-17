@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		  package="com.ondrejkomarek.pressureprovider">
+	<uses-feature android:name="android.hardware.type.watch"/>
+	<application android:allowBackup="true"
+				 android:icon="@mipmap/ic_launcher"
+				 android:label="@string/app_name"
+				 android:supportsRtl="true"
+				 android:theme="@android:style/Theme.DeviceDefault">
+
+
+		<service
+			android:name="com.ondrejkomarek.pressureprovider.PressureProviderService"
+			android:icon="@drawable/ic_watch_white"
+			android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+
+			<intent-filter>
+				<action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/>
+			</intent-filter>
+
+			<meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+					   android:value="SHORT_TEXT"/>
+
+			<meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+					   android:value="60"/>
+		</service>
+
+	</application>
+
+</manifest>
