@@ -3,7 +3,8 @@
 	<string name="message">Watch face tapped</string>
 	<string name="my_analog_name">My Analog</string>
 	<string name="analog_config_header_text">Configuration</string>
-	<string name="complications">Complications</string>
+	<string name="top_complication">Top complication</string>
+	<string name="bottom_complication">Bottom complication</string>
 
 
 </resources>

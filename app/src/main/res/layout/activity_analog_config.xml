@@ -20,16 +20,24 @@
 			android:fontFamily="sans-serif-condensed-light"
 			android:text="@string/analog_config_header_text"
 			android:textColor="@color/analog_config_header_text"
-			android:textSize="24sp"/>
+			android:textSize="16sp"/>
 
 
 		<Button
-			android:id="@+id/complications_button"
+			android:id="@+id/top_complication"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginTop="14dp"
-			android:text="@string/complications"/>
+			android:layout_marginTop="8dp"
+			android:text="@string/top_complication"/>
+
+		<Button
+			android:id="@+id/bottom_complication"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="4dp"
+			android:text="@string/bottom_complication"/>
 
 	</LinearLayout>
 

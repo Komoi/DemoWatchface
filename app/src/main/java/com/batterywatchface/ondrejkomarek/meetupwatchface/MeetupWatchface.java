@@ -29,6 +29,8 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -73,7 +75,16 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 	public static final int TOP_COMPLICATION = 0;
 	public static final int BOTTOM_COMPLICATION = 1;
 
+	public static final int TOP_COMPLICATION_TYPE = ComplicationData.TYPE_ICON;
+	public static final int BOTTOM_COMPLICATION_TYPE = ComplicationData.TYPE_SHORT_TEXT;
+
 	public static final int[] COMPLICATION_IDS = {TOP_COMPLICATION, BOTTOM_COMPLICATION};
+
+	public static final int COMPLICATION_ICON_SIZE = 40;
+
+	public String mBottomText = "";
+	public Drawable mTopIcon;
+	public Drawable mBottomIcon;
 
 
 	@Override
@@ -146,6 +157,8 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		private boolean mLowBitAmbient;
 		private boolean mBurnInProtection;
 
+		private Paint mComplicationPaint = new Paint();
+
 
 		@Override
 		public void onCreate(SurfaceHolder holder) {
@@ -211,6 +224,13 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			mCalendar = Calendar.getInstance();
 
 			setActiveComplications(COMPLICATION_IDS);//this starts receiving complication data
+
+			mComplicationPaint = new Paint();
+			mComplicationPaint.setColor(Color.WHITE);
+			mComplicationPaint.setTextAlign(Paint.Align.CENTER);
+			mComplicationPaint.setTextSize(40);
+			mComplicationPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+			mComplicationPaint.setAntiAlias(true);
 		}
 
 
@@ -218,12 +238,35 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		@Override
 		public void onComplicationDataUpdate(int watchFaceComplicationId, ComplicationData data) {
 			super.onComplicationDataUpdate(watchFaceComplicationId, data);
-			long now = System.currentTimeMillis();
-			if(data.getShortText() != null) {
-				Toast.makeText(getBaseContext(), "Complication data:" + data.getShortText().getText(getApplicationContext(), now), Toast.LENGTH_SHORT).show();
-			}
-			Log.i(TAG, "Complication data:" + ((data.getShortText() == null) ? "null" : data.getShortText().getText(getApplicationContext(), now)));
 
+			long now = System.currentTimeMillis();
+
+			switch(watchFaceComplicationId){
+				case TOP_COMPLICATION:
+					if(data.getIcon() != null) {
+						mTopIcon = data.getIcon().loadDrawable(getBaseContext());
+					} else {
+						mTopIcon = null;
+					}
+					break;
+
+				case BOTTOM_COMPLICATION://TODO save all data, it is better and it will be needed to have click actions etc.
+					if(data.getShortText() != null) {
+						mBottomText = data.getShortText().getText(getApplicationContext(), now).toString();
+					} else {
+						mBottomText = "";
+					}
+					if(data.getIcon() != null) {
+						mBottomIcon = data.getIcon().loadDrawable(getBaseContext());
+					} else {
+						mBottomIcon = null;
+					}
+					if(data.getShortTitle() != null) {
+						mBottomText = data.getShortTitle().getText(getApplicationContext(), now).toString() + " - " + mBottomText;
+					}
+					break;
+
+			}
 		}
 
 
@@ -430,6 +473,21 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 
             /* Restore the canvas' original orientation. */
 			canvas.restore();
+
+			if(mTopIcon != null){
+				mTopIcon.setBounds((int)mCenterX - COMPLICATION_ICON_SIZE/2, (int)mCenterY/2 - COMPLICATION_ICON_SIZE/2, (int)mCenterX + COMPLICATION_ICON_SIZE/2,  (int)mCenterY/2 + COMPLICATION_ICON_SIZE/2);
+				mTopIcon.draw(canvas);
+				Log.d(TAG, "rendering top icon");
+			}
+
+
+			if(mBottomIcon != null){
+				mBottomIcon.setBounds((int)mCenterX - COMPLICATION_ICON_SIZE/2, (int)(mCenterY + mCenterY/4*3) - COMPLICATION_ICON_SIZE*2, (int)mCenterX + COMPLICATION_ICON_SIZE/2,  (int)(mCenterY + mCenterY/4*3) - COMPLICATION_ICON_SIZE);
+				mBottomIcon.draw(canvas);
+				Log.d(TAG, "rendering bottom icon");
+			}
+			canvas.drawText(mBottomText, 0,	mBottomText.length(), mCenterX, mCenterY + mCenterY/4*3, mComplicationPaint);
+			Log.d(TAG, "rendering bottom text: " + mBottomText);
 
             /* Draw rectangle behind peek card in ambient mode to improve readability. */
 			if(mAmbient) {

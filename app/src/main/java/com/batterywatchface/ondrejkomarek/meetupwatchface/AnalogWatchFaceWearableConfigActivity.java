@@ -13,7 +13,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.BOTTOM_COMPLICATION;
-import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.COMPLICATION_IDS;
+import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.BOTTOM_COMPLICATION_TYPE;
+import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.TOP_COMPLICATION;
+import static com.batterywatchface.ondrejkomarek.meetupwatchface.MeetupWatchface.TOP_COMPLICATION_TYPE;
 
 
 /**
@@ -28,7 +30,8 @@ public class AnalogWatchFaceWearableConfigActivity extends Activity {
 	private static final String TAG = "AnalogWatchFaceConfig";
 
 	private TextView mHeader;
-	private Button mComplicationsButton;
+	private Button mTopComplicationButton;
+	private Button mBottomComplicationButton;
 
 
 	@Override
@@ -37,29 +40,34 @@ public class AnalogWatchFaceWearableConfigActivity extends Activity {
 		setContentView(R.layout.activity_analog_config);
 
 		mHeader = (TextView) findViewById(R.id.header);
-		mComplicationsButton = (Button) findViewById(R.id.complications_button);
+		mTopComplicationButton = (Button) findViewById(R.id.top_complication);
+		mBottomComplicationButton = (Button) findViewById(R.id.bottom_complication);
 
 		if(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
-			mComplicationsButton.setVisibility(View.INVISIBLE); //we need to hide complications settings button, because pressing it will cause nothing or lower APIs
+			mTopComplicationButton.setVisibility(View.INVISIBLE); //we need to hide complications settings button, because pressing it will cause nothing on lower APIs
+			mBottomComplicationButton.setVisibility(View.INVISIBLE);
 		}
 
-		mComplicationsButton.setOnClickListener(new View.OnClickListener() {
+		View.OnClickListener onClickListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				pickComplicationAndRequestData();
+				pickComplicationAndRequestData(v.equals(mBottomComplicationButton)? BOTTOM_COMPLICATION : TOP_COMPLICATION, v.equals(mBottomComplicationButton)? BOTTOM_COMPLICATION_TYPE : TOP_COMPLICATION_TYPE);
 			}
-		});
+		};
+
+		mTopComplicationButton.setOnClickListener(onClickListener);
+		mBottomComplicationButton.setOnClickListener(onClickListener);
 
 
 	}
 
 
-	private void pickComplicationAndRequestData(){
+	private void pickComplicationAndRequestData(int complicationID, int complicationDataType){
 		ComponentName componentName = new ComponentName(
 				getApplicationContext(),
 				MeetupWatchface.class);
 
-		Intent intent = ComplicationHelperActivity.createProviderChooserHelperIntent(getApplicationContext(), componentName, BOTTOM_COMPLICATION, ComplicationData.TYPE_SHORT_TEXT);
+		Intent intent = ComplicationHelperActivity.createProviderChooserHelperIntent(getApplicationContext(), componentName, complicationID, complicationDataType);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
 	}
