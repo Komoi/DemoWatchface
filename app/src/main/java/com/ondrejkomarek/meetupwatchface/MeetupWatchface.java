@@ -17,7 +17,6 @@
 package com.ondrejkomarek.meetupwatchface;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -35,14 +34,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.graphics.Palette;
-import android.support.wearable.companion.WatchFaceCompanion;
 import android.support.wearable.complications.ComplicationData;
-import android.support.wearable.complications.ComplicationHelperActivity;
-import android.support.wearable.complications.ProviderChooserIntent;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -60,28 +55,21 @@ import java.util.concurrent.TimeUnit;
 public class MeetupWatchface extends CanvasWatchFaceService {
 
 	public static final String TAG = "MeetupWatchface";
-
+	public static final int TOP_COMPLICATION = 0;
+	public static final int BOTTOM_COMPLICATION = 1;
+	public static final int TOP_COMPLICATION_TYPE = ComplicationData.TYPE_ICON;
+	public static final int BOTTOM_COMPLICATION_TYPE = ComplicationData.TYPE_SHORT_TEXT;
+	public static final int[] COMPLICATION_IDS = {TOP_COMPLICATION, BOTTOM_COMPLICATION};
+	public static final int COMPLICATION_ICON_SIZE = 40;
 	/*
 	 * Update rate in milliseconds for interactive mode. We update once a second to advance the
      * second hand.
      */
 	private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
-
 	/**
 	 * Handler message id for updating the time periodically in interactive mode.
 	 */
 	private static final int MSG_UPDATE_TIME = 0;
-
-	public static final int TOP_COMPLICATION = 0;
-	public static final int BOTTOM_COMPLICATION = 1;
-
-	public static final int TOP_COMPLICATION_TYPE = ComplicationData.TYPE_ICON;
-	public static final int BOTTOM_COMPLICATION_TYPE = ComplicationData.TYPE_SHORT_TEXT;
-
-	public static final int[] COMPLICATION_IDS = {TOP_COMPLICATION, BOTTOM_COMPLICATION};
-
-	public static final int COMPLICATION_ICON_SIZE = 40;
-
 	public String mBottomText = "";
 	public Drawable mTopIcon;
 	public Drawable mBottomIcon;
@@ -231,8 +219,16 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			mComplicationPaint.setTextSize(40);
 			mComplicationPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 			mComplicationPaint.setAntiAlias(true);
+
+
 		}
 
+
+		@Override
+		public void onDestroy() {
+			mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+			super.onDestroy();
+		}
 
 
 		@Override
@@ -241,7 +237,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 
 			long now = System.currentTimeMillis();
 
-			switch(watchFaceComplicationId){
+			switch(watchFaceComplicationId) {
 				case TOP_COMPLICATION:
 					if(data.getIcon() != null) {
 						mTopIcon = data.getIcon().loadDrawable(getBaseContext());
@@ -267,13 +263,6 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 					break;
 
 			}
-		}
-
-
-		@Override
-		public void onDestroy() {
-			mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
-			super.onDestroy();
 		}
 
 
@@ -325,7 +314,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			super.onSurfaceChanged(holder, format, width, height);
 
             /*
-             * Find the coordinates of the center point on the screen, and ignore the window
+			 * Find the coordinates of the center point on the screen, and ignore the window
              * insets, so that, on round watches with a "chin", the watch face is centered on the
              * entire screen, not just the usable portion.
              */
@@ -474,20 +463,17 @@ public class MeetupWatchface extends CanvasWatchFaceService {
             /* Restore the canvas' original orientation. */
 			canvas.restore();
 
-			if(mTopIcon != null){
-				mTopIcon.setBounds((int)mCenterX - COMPLICATION_ICON_SIZE/2, (int)mCenterY/2 - COMPLICATION_ICON_SIZE/2, (int)mCenterX + COMPLICATION_ICON_SIZE/2,  (int)mCenterY/2 + COMPLICATION_ICON_SIZE/2);
+			if(mTopIcon != null) {
+				mTopIcon.setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
 				mTopIcon.draw(canvas);
-				Log.d(TAG, "rendering top icon");
 			}
 
 
-			if(mBottomIcon != null){
-				mBottomIcon.setBounds((int)mCenterX - COMPLICATION_ICON_SIZE/2, (int)(mCenterY + mCenterY/4*3) - COMPLICATION_ICON_SIZE*2, (int)mCenterX + COMPLICATION_ICON_SIZE/2,  (int)(mCenterY + mCenterY/4*3) - COMPLICATION_ICON_SIZE);
+			if(mBottomIcon != null) {
+				mBottomIcon.setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE * 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE);
 				mBottomIcon.draw(canvas);
-				Log.d(TAG, "rendering bottom icon");
 			}
-			canvas.drawText(mBottomText, 0,	mBottomText.length(), mCenterX, mCenterY + mCenterY/4*3, mComplicationPaint);
-			Log.d(TAG, "rendering bottom text: " + mBottomText);
+			canvas.drawText(mBottomText, 0, mBottomText.length(), mCenterX, mCenterY + mCenterY / 4 * 3, mComplicationPaint);
 
             /* Draw rectangle behind peek card in ambient mode to improve readability. */
 			if(mAmbient) {
