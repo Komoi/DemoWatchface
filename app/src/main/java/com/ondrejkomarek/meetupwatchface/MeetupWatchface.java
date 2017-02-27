@@ -16,6 +16,7 @@
 
 package com.ondrejkomarek.meetupwatchface;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -70,10 +72,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 	 * Handler message id for updating the time periodically in interactive mode.
 	 */
 	private static final int MSG_UPDATE_TIME = 0;
-	public String mBottomText = "";
-	public Drawable mTopIcon;
-	public Drawable mBottomIcon;
-
+	private ExtendedComplicationData[] mExtendedComplicationData = {new ExtendedComplicationData(), new ExtendedComplicationData()};
 
 	@Override
 	public Engine onCreateEngine() {
@@ -219,8 +218,6 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			mComplicationPaint.setTextSize(40);
 			mComplicationPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 			mComplicationPaint.setAntiAlias(true);
-
-
 		}
 
 
@@ -237,31 +234,45 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 
 			long now = System.currentTimeMillis();
 
+			mExtendedComplicationData[watchFaceComplicationId].setComplicationData(data);
+			mExtendedComplicationData[watchFaceComplicationId].setComplicationId(watchFaceComplicationId);
+
 			switch(watchFaceComplicationId) {
 				case TOP_COMPLICATION:
-					if(data.getIcon() != null) {
-						mTopIcon = data.getIcon().loadDrawable(getBaseContext());
+					if(data.getIcon() != null) {//mandatory field - data are not valid if null
+						mExtendedComplicationData[watchFaceComplicationId].setComplicationType(TOP_COMPLICATION_TYPE);
+						mExtendedComplicationData[watchFaceComplicationId].setHasValidData(true);
 					} else {
-						mTopIcon = null;
+						mExtendedComplicationData[watchFaceComplicationId].setHasValidData(false);
 					}
 					break;
 
-				case BOTTOM_COMPLICATION://TODO save all data, it is better and it will be needed to have click actions etc.
-					if(data.getShortText() != null) {
-						mBottomText = data.getShortText().getText(getApplicationContext(), now).toString();
+				case BOTTOM_COMPLICATION:
+					if(data.getShortText() != null) {//mandatory field - data are not valid if null
+						mExtendedComplicationData[watchFaceComplicationId].setComplicationType(BOTTOM_COMPLICATION_TYPE);
+						mExtendedComplicationData[watchFaceComplicationId].setHasValidData(true);
 					} else {
-						mBottomText = "";
-					}
-					if(data.getIcon() != null) {
-						mBottomIcon = data.getIcon().loadDrawable(getBaseContext());
-					} else {
-						mBottomIcon = null;
-					}
-					if(data.getShortTitle() != null) {
-						mBottomText = data.getShortTitle().getText(getApplicationContext(), now).toString() + " - " + mBottomText;
+						mExtendedComplicationData[watchFaceComplicationId].setHasValidData(false);
 					}
 					break;
+			}
 
+			if(data.getIcon() != null) {
+				mExtendedComplicationData[watchFaceComplicationId].setIcon(data.getIcon().loadDrawable(getBaseContext()));
+			} else {
+				mExtendedComplicationData[watchFaceComplicationId].setIcon(null);
+			}
+
+			if(data.getShortText() != null) {
+				mExtendedComplicationData[watchFaceComplicationId].setShortText(data.getShortText().getText(getApplicationContext(), now).toString());
+			} else {
+				mExtendedComplicationData[watchFaceComplicationId].setShortText("");
+			}
+
+			if(data.getShortTitle() != null) {
+				mExtendedComplicationData[watchFaceComplicationId].setTitle(data.getShortTitle().getText(getApplicationContext(), now).toString());
+			} else {
+				mExtendedComplicationData[watchFaceComplicationId].setTitle("");
 			}
 		}
 
@@ -367,12 +378,30 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 					break;
 				case TAP_TYPE_TAP:
 					// The user has completed the tap gesture.
-					// TODO: Add code to handle the tap gesture.
-					Toast.makeText(getApplicationContext(), R.string.message, Toast.LENGTH_SHORT)
-							.show();
+					checkComplicationTap(TOP_COMPLICATION, x, y);
+					checkComplicationTap(BOTTOM_COMPLICATION, x, y);
+
 					break;
 			}
 			invalidate();
+		}
+
+		private void checkComplicationTap(int complicationId, int x, int y){
+			if(mExtendedComplicationData[complicationId].getComplicationBounds() != null){
+				if(mExtendedComplicationData[complicationId].getComplicationBounds().contains(x, y)){
+					PendingIntent complicationAction = mExtendedComplicationData[complicationId].getComplicationData().getTapAction();
+					Toast.makeText(getApplicationContext(), "tapped complication: " + complicationId, Toast.LENGTH_SHORT)
+							.show();
+					if(complicationAction != null){
+						Log.d(TAG, "Tap cotains id: " + complicationId);
+						try {
+							complicationAction.send();
+						} catch(PendingIntent.CanceledException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		}
 
 
@@ -463,21 +492,42 @@ public class MeetupWatchface extends CanvasWatchFaceService {
             /* Restore the canvas' original orientation. */
 			canvas.restore();
 
-			if(mTopIcon != null) {
-				mTopIcon.setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
-				mTopIcon.draw(canvas);
-			}
 
-
-			if(mBottomIcon != null) {
-				mBottomIcon.setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE * 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE);
-				mBottomIcon.draw(canvas);
-			}
-			canvas.drawText(mBottomText, 0, mBottomText.length(), mCenterX, mCenterY + mCenterY / 4 * 3, mComplicationPaint);
+			renderComplications(canvas);
 
             /* Draw rectangle behind peek card in ambient mode to improve readability. */
 			if(mAmbient) {
 				canvas.drawRect(mPeekCardBounds, mBackgroundPaint);
+			}
+		}
+
+
+		private void renderComplications(Canvas canvas){
+			if(mExtendedComplicationData[TOP_COMPLICATION] != null && mExtendedComplicationData[TOP_COMPLICATION].isHasValidData()){
+				mExtendedComplicationData[TOP_COMPLICATION].getIcon().setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
+				mExtendedComplicationData[TOP_COMPLICATION].getIcon().draw(canvas);
+				mExtendedComplicationData[TOP_COMPLICATION].setComplicationBounds(mExtendedComplicationData[TOP_COMPLICATION].getIcon().getBounds());
+			}
+
+			if(mExtendedComplicationData[BOTTOM_COMPLICATION] != null && mExtendedComplicationData[BOTTOM_COMPLICATION].isHasValidData()) {
+				if(mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon() != null) {
+					mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE * 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE);
+					mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().draw(canvas);
+					mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().getBounds());
+				}
+
+				String bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getShortText();
+				if(!mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle().isEmpty()){
+					bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle() + " - " + bottomText;
+				}
+				float textBaseY = mCenterY + mCenterY / 4 * 3;
+				float textWidth = mComplicationPaint.measureText(bottomText);
+				Rect textBounds = new Rect();
+				textBounds.set((int)(mCenterX - textWidth/2), (int)(textBaseY - mComplicationPaint.getTextSize()),
+						(int)(mCenterX + textWidth/2), (int)(textBaseY + mComplicationPaint.getTextSize()));
+
+				mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(textBounds);
+				canvas.drawText(bottomText, 0, bottomText.length(), mCenterX, textBaseY, mComplicationPaint);
 			}
 		}
 
