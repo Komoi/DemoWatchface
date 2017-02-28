@@ -9,7 +9,7 @@ import android.support.wearable.complications.ComplicationData;
  * Created by ondrejkomarek on 17/02/2017.
  */
 
-public class ExtendedComplicationData {//can not be actually extended due to private constructors
+public class ExtendedComplicationData {//REVIEW ComplicationData can not be actually extended due to private constructors
 
 
 	private ComplicationData mComplicationData;
