@@ -59,6 +59,7 @@ public class AnalogWatchFaceWearableConfigActivity extends Activity {
 
 	}
 
+
 	// REVIEW button click handling, launching "ComplicationHelperActivity" for specific slot
 	private void pickComplicationAndRequestData(int complicationID, int complicationDataType) {
 		ComponentName componentName = new ComponentName(

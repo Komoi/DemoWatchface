@@ -358,7 +358,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 					(int) (mBackgroundBitmap.getHeight() * scale), true);
 
             /*
-             * Create a gray version of the image only if it will look nice on the device in
+			 * Create a gray version of the image only if it will look nice on the device in
              * ambient mode. That means we don't want devices that support burn-in
              * protection (slight movements in pixels, not great for images going all the way to
              * edges) and low ambient mode (degrades image quality).
@@ -373,50 +373,30 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		}
 
 
-		/**
-		 * Captures tap event (and tap type). The {@link WatchFaceService#TAP_TYPE_TAP} case can be
-		 * used for implementing specific logic to handle the gesture.
-		 */
 		@Override
-		public void onTapCommand(int tapType, int x, int y, long eventTime) {
-			switch(tapType) {
-				case TAP_TYPE_TOUCH:
-					// The user has started touching the screen.
-					break;
-				case TAP_TYPE_TOUCH_CANCEL:
-					// The user has started a different gesture or otherwise cancelled the tap.
-					break;
-				case TAP_TYPE_TAP:
-					//REVIEW custom determination, if tap was aimed to some complication
-					// The user has completed the tap gesture.
-					checkComplicationTap(TOP_COMPLICATION, x, y);
-					checkComplicationTap(BOTTOM_COMPLICATION, x, y);
+		public void onVisibilityChanged(boolean visible) {
+			super.onVisibilityChanged(visible);
 
-					break;
+			if(visible) {
+				registerReceiver();
+                /* Update time zone in case it changed while we weren't visible. */
+				mCalendar.setTimeZone(TimeZone.getDefault());
+				invalidate();
+			} else {
+				unregisterReceiver();
 			}
-			invalidate();
+
+            /* Check and trigger whether or not timer should be running (only in active mode). */
+			updateTimer();
 		}
 
 
-		private void checkComplicationTap(int complicationId, int x, int y) {
-			if(mExtendedComplicationData[complicationId].getComplicationBounds() != null) {
-
-				if(mExtendedComplicationData[complicationId].getComplicationBounds().contains(x, y)) {
-					PendingIntent complicationAction = mExtendedComplicationData[complicationId].getComplicationData().getTapAction();
-					Toast.makeText(getApplicationContext(), "tapped complication: " + complicationId, Toast.LENGTH_SHORT)
-							.show();
-
-					if(complicationAction != null) {
-						Log.d(TAG, "Tap cotains id: " + complicationId);
-						try {
-							complicationAction.send();
-						} catch(PendingIntent.CanceledException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
+		@Override
+		public void onPeekCardPositionUpdate(Rect rect) {
+			super.onPeekCardPositionUpdate(rect);
+			mPeekCardBounds.set(rect);
 		}
+
 
 		//REVIEW most of this code was generated, calculations needed to draw watch elements, ticks
 		@Override
@@ -516,6 +496,53 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			}
 		}
 
+
+		/**
+		 * Captures tap event (and tap type). The {@link WatchFaceService#TAP_TYPE_TAP} case can be
+		 * used for implementing specific logic to handle the gesture.
+		 */
+		@Override
+		public void onTapCommand(int tapType, int x, int y, long eventTime) {
+			switch(tapType) {
+				case TAP_TYPE_TOUCH:
+					// The user has started touching the screen.
+					break;
+				case TAP_TYPE_TOUCH_CANCEL:
+					// The user has started a different gesture or otherwise cancelled the tap.
+					break;
+				case TAP_TYPE_TAP:
+					//REVIEW custom determination, if tap was aimed to some complication
+					// The user has completed the tap gesture.
+					checkComplicationTap(TOP_COMPLICATION, x, y);
+					checkComplicationTap(BOTTOM_COMPLICATION, x, y);
+
+					break;
+			}
+			invalidate();
+		}
+
+		// REVIEW custom tap handling
+		private void checkComplicationTap(int complicationId, int x, int y) {
+			if(mExtendedComplicationData[complicationId].getComplicationBounds() != null) {
+
+				if(mExtendedComplicationData[complicationId].getComplicationBounds().contains(x, y)) {
+					PendingIntent complicationAction = mExtendedComplicationData[complicationId].getComplicationData().getTapAction();
+					Toast.makeText(getApplicationContext(), "tapped complication: " + complicationId, Toast.LENGTH_SHORT)
+							.show();
+
+					if(complicationAction != null) {
+						Log.d(TAG, "Tap cotains id: " + complicationId);
+						try {
+							complicationAction.send();
+						} catch(PendingIntent.CanceledException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+
+
 		private void renderComplications(Canvas canvas) {
 			if(mExtendedComplicationData[TOP_COMPLICATION] != null && mExtendedComplicationData[TOP_COMPLICATION].isHasValidData()) {
 				mExtendedComplicationData[TOP_COMPLICATION].getIcon().setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
@@ -544,31 +571,6 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 				mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(textBounds);
 				canvas.drawText(bottomText, 0, bottomText.length(), mCenterX, textBaseY, mComplicationPaint);
 			}
-		}
-
-
-		@Override
-		public void onVisibilityChanged(boolean visible) {
-			super.onVisibilityChanged(visible);
-
-			if(visible) {
-				registerReceiver();
-                /* Update time zone in case it changed while we weren't visible. */
-				mCalendar.setTimeZone(TimeZone.getDefault());
-				invalidate();
-			} else {
-				unregisterReceiver();
-			}
-
-            /* Check and trigger whether or not timer should be running (only in active mode). */
-			updateTimer();
-		}
-
-
-		@Override
-		public void onPeekCardPositionUpdate(Rect rect) {
-			super.onPeekCardPositionUpdate(rect);
-			mPeekCardBounds.set(rect);
 		}
 
 

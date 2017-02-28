@@ -9,25 +9,25 @@ import android.support.multidex.MultiDex;
  * Created by ondrejkomarek on 15/02/2017.
  */
 
-public class MeetupWatchfaceApplication  extends Application
-{
+public class MeetupWatchfaceApplication extends Application {
 	private static MeetupWatchfaceApplication sInstance;
 
-	public MeetupWatchfaceApplication()
-	{
-		sInstance = this;
-	}
 
-	public static Context getContext()
-	{
+	public static Context getContext() {
 		return sInstance;
 	}
 
+
+	public MeetupWatchfaceApplication() {
+		sInstance = this;
+	}
+
+
 	@Override
-	public void onCreate()
-	{
+	public void onCreate() {
 		super.onCreate();
 	}
+
 
 	@Override
 	protected void attachBaseContext(Context base) {

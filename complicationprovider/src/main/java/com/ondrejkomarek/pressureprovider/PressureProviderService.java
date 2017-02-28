@@ -101,6 +101,7 @@ public class PressureProviderService extends ComplicationProviderService impleme
 
 	}
 
+
 	//REVIEW saving current value in a string with unit
 	@Override
 	public void onSensorChanged(SensorEvent event) {
@@ -114,6 +115,7 @@ public class PressureProviderService extends ComplicationProviderService impleme
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
 	}
+
 
 	//REVIEW start receiving sensor data
 	private void initPressureReading() {
