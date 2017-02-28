@@ -9,7 +9,7 @@
 		android:supportsRtl="true"
 		android:theme="@android:style/Theme.DeviceDefault">
 
-
+		<!-- REVIEW Pressure data providing service -->
 		<service
 			android:name="com.ondrejkomarek.pressureprovider.PressureProviderService"
 			android:icon="@drawable/ic_watch_white"
@@ -19,11 +19,12 @@
 				<action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/>
 			</intent-filter>
 
+			<!-- REVIEW supported complication data type -->
 			<meta-data
 				android:name="android.support.wearable.complications.SUPPORTED_TYPES"
 				android:value="SHORT_TEXT"/>
 
-			<!-- This will be probably called less fequently, because it is ultimately determined by system -->
+			<!-- REVIEW This will be probably called less frequently, because it is ultimately determined by system -->
 			<meta-data
 				android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
 				android:value="60"/>

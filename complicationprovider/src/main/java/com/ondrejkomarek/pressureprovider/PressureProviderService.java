@@ -25,6 +25,7 @@ public class PressureProviderService extends ComplicationProviderService impleme
 	private Sensor mPressure;
 	private String mPressureString = "";
 	private ComponentName mComponentName;
+
 	private ProviderUpdateRequester mProviderUpdateRequester;
 	private Handler mComplicationUpdateHandler;
 
@@ -36,7 +37,8 @@ public class PressureProviderService extends ComplicationProviderService impleme
 			initPressureReading();
 		}
 
-		//This enables to send complication info much more often, then system usually allows. Do not use it unless really necessary - this is for quick demonstration purposes only.
+		// REVIEW This enables to send complication info much more often, then system usually allows.
+		// REVIEW  Do not use it unless really necessary - this is for quick changes while demonstrating.
 		if(mProviderUpdateRequester == null && !handlerSetUp) {
 			mComponentName = new ComponentName(getApplicationContext(), PressureProviderService.class);
 			mProviderUpdateRequester = new ProviderUpdateRequester(getBaseContext(), mComponentName);
@@ -45,7 +47,7 @@ public class PressureProviderService extends ComplicationProviderService impleme
 				@Override
 				public void run() {
 					if(mProviderUpdateRequester != null) {
-						mProviderUpdateRequester.requestUpdateAll();
+						mProviderUpdateRequester.requestUpdateAll(); // REVIEW this forces data update
 					}
 					mComplicationUpdateHandler.postDelayed(this, 1000 * 10);
 				}
@@ -68,10 +70,10 @@ public class PressureProviderService extends ComplicationProviderService impleme
 	@Override
 	public void onComplicationActivated(int complicationId, int dataType, ComplicationManager complicationManager) {
 		initPressureReading();
-
 	}
 
 
+	//REVIEW this method is called when data update is requested.
 	@Override
 	public void onComplicationUpdate(int complicationId, int dataType, ComplicationManager complicationManager) {
 		ComplicationData complicationData = null;
@@ -79,12 +81,14 @@ public class PressureProviderService extends ComplicationProviderService impleme
 
 		switch(dataType) {
 			case ComplicationData.TYPE_SHORT_TEXT:
+				//REVIEW fill with data of relevant type
 				complicationData = new ComplicationData.Builder(ComplicationData.TYPE_SHORT_TEXT)
 						.setShortText(ComplicationText.plainText(mPressureString))
 						.build();
 				break;
 		}
 
+		//REVIEW send updated data
 		if(complicationData != null) {
 			complicationManager.updateComplicationData(complicationId, complicationData);
 		}
@@ -97,7 +101,7 @@ public class PressureProviderService extends ComplicationProviderService impleme
 
 	}
 
-
+	//REVIEW saving current value in a string with unit
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		if(event.sensor.getType() == Sensor.TYPE_PRESSURE) {
@@ -111,7 +115,7 @@ public class PressureProviderService extends ComplicationProviderService impleme
 
 	}
 
-
+	//REVIEW start receiving sensor data
 	private void initPressureReading() {
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);

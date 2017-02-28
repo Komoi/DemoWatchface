@@ -41,29 +41,19 @@
 			</intent-filter>
 		</service>
 
-		<!-- To be able to pick complication for specific slot easily-->
+		<!-- REVIEW To be able to pick complication for specific slot easily-->
 		<activity android:name="android.support.wearable.complications.ComplicationHelperActivity"/>
 
-		<!-- Activity, which will be registered as configuration one and will enable "settings" icon under watchface -->
+		<!-- REVIEW Activity, which will be registered as configuration one and will enable "settings" icon under watchface -->
 		<activity
 			android:name=".AnalogWatchFaceWearableConfigActivity"
 			android:label="@string/my_analog_name">
-			<!-- old android wear 1.0 configuration intent filter for general settings-->
-			<!--
-				<intent-filter>
-					<action android:name=
-								"com.example.android.wearable.watchface.CONFIG_ANALOG"/>
-					<category android:name=
-								  "com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"/>
-					<category android:name="android.intent.category.DEFAULT"/>
-				</intent-filter>
-			  -->
-
 			<!-- new android wear 2.0 configuration intent filter for complication settings-->
 			<intent-filter>
-				<action android:name="com.example.android.wearable.watchface.CONFIG_COMPLICATION"/>
-
-				<category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"/>
+				<action android:name=
+						"com.example.android.wearable.watchface.CONFIG_COMPLICATION"/>
+				<category android:name=
+						"com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"/>
 				<category android:name="android.intent.category.DEFAULT"/>
 			</intent-filter>
 		</activity>

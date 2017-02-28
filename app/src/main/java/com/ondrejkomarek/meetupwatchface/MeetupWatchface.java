@@ -30,7 +30,6 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -54,11 +53,15 @@ import java.util.concurrent.TimeUnit;
  * shown. On devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient
  * mode. The watch face is drawn with less contrast in mute mode.
  */
+//REVIEW most of this code was generated
 public class MeetupWatchface extends CanvasWatchFaceService {
 
 	public static final String TAG = "MeetupWatchface";
+
+	//complication IDs
 	public static final int TOP_COMPLICATION = 0;
 	public static final int BOTTOM_COMPLICATION = 1;
+
 	public static final int TOP_COMPLICATION_TYPE = ComplicationData.TYPE_ICON;
 	public static final int BOTTOM_COMPLICATION_TYPE = ComplicationData.TYPE_SHORT_TEXT;
 	public static final int[] COMPLICATION_IDS = {TOP_COMPLICATION, BOTTOM_COMPLICATION};
@@ -73,6 +76,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 	 */
 	private static final int MSG_UPDATE_TIME = 0;
 	private ExtendedComplicationData[] mExtendedComplicationData = {new ExtendedComplicationData(), new ExtendedComplicationData()};
+
 
 	@Override
 	public Engine onCreateEngine() {
@@ -89,6 +93,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		}
 
 
+		//handles time updates for ambient and interactive mode
 		@Override
 		public void handleMessage(Message msg) {
 			MeetupWatchface.Engine engine = mWeakReference.get();
@@ -109,7 +114,6 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		private static final float SECOND_TICK_STROKE_WIDTH = 2f;
 
 		private static final float CENTER_GAP_AND_CIRCLE_RADIUS = 4f;
-
 		private static final int SHADOW_RADIUS = 6;
 		private final Rect mPeekCardBounds = new Rect();
 		/* Handler to update the time once a second in interactive mode. */
@@ -122,6 +126,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 				invalidate();
 			}
 		};
+
 		private boolean mRegisteredTimeZoneReceiver = false;
 		private boolean mMuteMode;
 		private float mCenterX;
@@ -210,7 +215,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 
 			mCalendar = Calendar.getInstance();
 
-			setActiveComplications(COMPLICATION_IDS);//this starts receiving complication data
+			setActiveComplications(COMPLICATION_IDS);//REVIEW this starts receiving complication data
 
 			mComplicationPaint = new Paint();
 			mComplicationPaint.setColor(Color.WHITE);
@@ -228,6 +233,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		}
 
 
+		//REVIEW complication data
 		@Override
 		public void onComplicationDataUpdate(int watchFaceComplicationId, ComplicationData data) {
 			super.onComplicationDataUpdate(watchFaceComplicationId, data);
@@ -237,6 +243,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			mExtendedComplicationData[watchFaceComplicationId].setComplicationData(data);
 			mExtendedComplicationData[watchFaceComplicationId].setComplicationId(watchFaceComplicationId);
 
+			//REVIEW handling data accordingly to its expected type
 			switch(watchFaceComplicationId) {
 				case TOP_COMPLICATION:
 					if(data.getIcon() != null) {//mandatory field - data are not valid if null
@@ -257,7 +264,9 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 					break;
 			}
 
+			//REVIEW also saving to my helper class so it does not need to be extracted in every call of onDraw
 			if(data.getIcon() != null) {
+				//REVIEW extracting drawable from icon - can be time consuming, better to do just once!
 				mExtendedComplicationData[watchFaceComplicationId].setIcon(data.getIcon().loadDrawable(getBaseContext()));
 			} else {
 				mExtendedComplicationData[watchFaceComplicationId].setIcon(null);
@@ -292,6 +301,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		}
 
 
+		//REVIEW saving ambient status - we can handle ambient mode as we like
 		@Override
 		public void onAmbientModeChanged(boolean inAmbientMode) {
 			super.onAmbientModeChanged(inAmbientMode);
@@ -333,7 +343,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			mCenterY = height / 2f;
 
             /*
-             * Calculate lengths of different hands based on watch screen size.
+			 * Calculate lengths of different hands based on watch screen size.
              */
 			mSecondHandLength = (float) (mCenterX * 0.875);
 			sMinuteHandLength = (float) (mCenterX * 0.75);
@@ -377,6 +387,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 					// The user has started a different gesture or otherwise cancelled the tap.
 					break;
 				case TAP_TYPE_TAP:
+					//REVIEW custom determination, if tap was aimed to some complication
 					// The user has completed the tap gesture.
 					checkComplicationTap(TOP_COMPLICATION, x, y);
 					checkComplicationTap(BOTTOM_COMPLICATION, x, y);
@@ -386,13 +397,16 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			invalidate();
 		}
 
-		private void checkComplicationTap(int complicationId, int x, int y){
-			if(mExtendedComplicationData[complicationId].getComplicationBounds() != null){
-				if(mExtendedComplicationData[complicationId].getComplicationBounds().contains(x, y)){
+
+		private void checkComplicationTap(int complicationId, int x, int y) {
+			if(mExtendedComplicationData[complicationId].getComplicationBounds() != null) {
+
+				if(mExtendedComplicationData[complicationId].getComplicationBounds().contains(x, y)) {
 					PendingIntent complicationAction = mExtendedComplicationData[complicationId].getComplicationData().getTapAction();
 					Toast.makeText(getApplicationContext(), "tapped complication: " + complicationId, Toast.LENGTH_SHORT)
 							.show();
-					if(complicationAction != null){
+
+					if(complicationAction != null) {
 						Log.d(TAG, "Tap cotains id: " + complicationId);
 						try {
 							complicationAction.send();
@@ -404,7 +418,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			}
 		}
 
-
+		//REVIEW most of this code was generated, calculations needed to draw watch elements, ticks
 		@Override
 		public void onDraw(Canvas canvas, Rect bounds) {
 			long now = System.currentTimeMillis();
@@ -451,9 +465,12 @@ public class MeetupWatchface extends CanvasWatchFaceService {
             /*
              * Save the canvas state before we can begin to rotate it.
              */
+
+			renderComplications(canvas); //REVIEW rendering complications - should be before rendering foreground watch elements
+
 			canvas.save();
 
-			canvas.rotate(hoursRotation, mCenterX, mCenterY);
+			canvas.rotate(hoursRotation, mCenterX, mCenterY); //REVIEW rotating whole canvas to make watch hands rendering simpler
 			canvas.drawLine(
 					mCenterX,
 					mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
@@ -493,20 +510,18 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 			canvas.restore();
 
 
-			renderComplications(canvas);
-
             /* Draw rectangle behind peek card in ambient mode to improve readability. */
 			if(mAmbient) {
 				canvas.drawRect(mPeekCardBounds, mBackgroundPaint);
 			}
 		}
 
-
-		private void renderComplications(Canvas canvas){
-			if(mExtendedComplicationData[TOP_COMPLICATION] != null && mExtendedComplicationData[TOP_COMPLICATION].isHasValidData()){
+		private void renderComplications(Canvas canvas) {
+			if(mExtendedComplicationData[TOP_COMPLICATION] != null && mExtendedComplicationData[TOP_COMPLICATION].isHasValidData()) {
 				mExtendedComplicationData[TOP_COMPLICATION].getIcon().setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2, (int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
 				mExtendedComplicationData[TOP_COMPLICATION].getIcon().draw(canvas);
 				mExtendedComplicationData[TOP_COMPLICATION].setComplicationBounds(mExtendedComplicationData[TOP_COMPLICATION].getIcon().getBounds());
+				//REVIEW saving bounds of icon
 			}
 
 			if(mExtendedComplicationData[BOTTOM_COMPLICATION] != null && mExtendedComplicationData[BOTTOM_COMPLICATION].isHasValidData()) {
@@ -517,14 +532,14 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 				}
 
 				String bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getShortText();
-				if(!mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle().isEmpty()){
+				if(!mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle().isEmpty()) {
 					bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle() + " - " + bottomText;
 				}
 				float textBaseY = mCenterY + mCenterY / 4 * 3;
 				float textWidth = mComplicationPaint.measureText(bottomText);
 				Rect textBounds = new Rect();
-				textBounds.set((int)(mCenterX - textWidth/2), (int)(textBaseY - mComplicationPaint.getTextSize()),
-						(int)(mCenterX + textWidth/2), (int)(textBaseY + mComplicationPaint.getTextSize()));
+				textBounds.set((int) (mCenterX - textWidth / 2), (int) (textBaseY - mComplicationPaint.getTextSize()),
+						(int) (mCenterX + textWidth / 2), (int) (textBaseY + mComplicationPaint.getTextSize()));
 
 				mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(textBounds);
 				canvas.drawText(bottomText, 0, bottomText.length(), mCenterX, textBaseY, mComplicationPaint);
