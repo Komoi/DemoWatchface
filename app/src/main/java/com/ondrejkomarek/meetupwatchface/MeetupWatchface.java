@@ -503,6 +503,46 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		}
 
 
+		private void renderComplications(Canvas canvas) {
+			if(mExtendedComplicationData[TOP_COMPLICATION] != null &&
+					mExtendedComplicationData[TOP_COMPLICATION].isHasValidData()) {
+				//REVIEW using already extracted drawable
+				mExtendedComplicationData[TOP_COMPLICATION].getIcon()
+						.setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2,
+								(int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
+				mExtendedComplicationData[TOP_COMPLICATION].getIcon().draw(canvas);
+				mExtendedComplicationData[TOP_COMPLICATION]
+						.setComplicationBounds(mExtendedComplicationData[TOP_COMPLICATION].getIcon().getBounds());
+				//REVIEW saving bounds of icon
+			}
+
+			if(mExtendedComplicationData[BOTTOM_COMPLICATION] != null &&
+					mExtendedComplicationData[BOTTOM_COMPLICATION].isHasValidData()) {
+				if(mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon() != null) {
+					mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().setBounds(
+							(int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE * 2,
+							(int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE);
+					mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().draw(canvas);
+					mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(mExtendedComplicationData[BOTTOM_COMPLICATION]
+							.getIcon().getBounds());
+				}
+				//REVIEW kind of pain - different complication providers shares very different data, different lengths etc.
+				String bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getShortText();
+				if(!mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle().isEmpty()) {
+					bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle() + " - " + bottomText;
+				}
+				float textBaseY = mCenterY + mCenterY / 4 * 3;
+				float textWidth = mComplicationPaint.measureText(bottomText);
+				Rect textBounds = new Rect();
+				textBounds.set((int) (mCenterX - textWidth / 2), (int) (textBaseY - mComplicationPaint.getTextSize()),
+						(int) (mCenterX + textWidth / 2), (int) (textBaseY + mComplicationPaint.getTextSize()));
+
+				mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(textBounds);
+				canvas.drawText(bottomText, 0, bottomText.length(), mCenterX, textBaseY, mComplicationPaint);
+			}
+		}
+
+
 		/**
 		 * Captures tap event (and tap type). The {@link WatchFaceService#TAP_TYPE_TAP} case can be
 		 * used for implementing specific logic to handle the gesture.
@@ -539,6 +579,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 					if(complicationAction != null) {
 						Log.d(TAG, "Tap cotains id: " + complicationId);
 						try {
+							//REVIEW LAUNCH INTENT IF NOT NULL - optional field in ComplicationData
 							complicationAction.send();
 						} catch(PendingIntent.CanceledException e) {
 							e.printStackTrace();
@@ -549,45 +590,7 @@ public class MeetupWatchface extends CanvasWatchFaceService {
 		}
 
 
-		private void renderComplications(Canvas canvas) {
-			if(mExtendedComplicationData[TOP_COMPLICATION] != null &&
-					mExtendedComplicationData[TOP_COMPLICATION].isHasValidData()) {
-				mExtendedComplicationData[TOP_COMPLICATION].getIcon()
-						.setBounds((int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 - COMPLICATION_ICON_SIZE / 2,
-						(int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) mCenterY / 2 + COMPLICATION_ICON_SIZE / 2);
-				mExtendedComplicationData[TOP_COMPLICATION].getIcon().draw(canvas);
-				mExtendedComplicationData[TOP_COMPLICATION]
-						.setComplicationBounds(mExtendedComplicationData[TOP_COMPLICATION].getIcon().getBounds());
-				//REVIEW saving bounds of icon
-			}
-
-			if(mExtendedComplicationData[BOTTOM_COMPLICATION] != null &&
-					mExtendedComplicationData[BOTTOM_COMPLICATION].isHasValidData()) {
-				if(mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon() != null) {
-					mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().setBounds(
-						(int) mCenterX - COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE * 2,
-						(int) mCenterX + COMPLICATION_ICON_SIZE / 2, (int) (mCenterY + mCenterY / 4 * 3) - COMPLICATION_ICON_SIZE);
-					mExtendedComplicationData[BOTTOM_COMPLICATION].getIcon().draw(canvas);
-					mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(mExtendedComplicationData[BOTTOM_COMPLICATION]
-						.getIcon().getBounds());
-				}
-				//REVIEW kind of pain - different complication providers shares very different data, different lengths etc.
-				String bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getShortText();
-				if(!mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle().isEmpty()) {
-					bottomText = mExtendedComplicationData[BOTTOM_COMPLICATION].getTitle() + " - " + bottomText;
-				}
-				float textBaseY = mCenterY + mCenterY / 4 * 3;
-				float textWidth = mComplicationPaint.measureText(bottomText);
-				Rect textBounds = new Rect();
-				textBounds.set((int) (mCenterX - textWidth / 2), (int) (textBaseY - mComplicationPaint.getTextSize()),
-						(int) (mCenterX + textWidth / 2), (int) (textBaseY + mComplicationPaint.getTextSize()));
-
-				mExtendedComplicationData[BOTTOM_COMPLICATION].setComplicationBounds(textBounds);
-				canvas.drawText(bottomText, 0, bottomText.length(), mCenterX, textBaseY, mComplicationPaint);
-			}
-		}
-
-
+		//REVIEW shaadow and more efects when interactive
 		private void updateWatchHandStyle() {
 			if(mAmbient) {
 				mHourPaint.setColor(Color.WHITE);

@@ -27,7 +27,7 @@
 			<!-- REVIEW This will be probably called less frequently, because it is ultimately determined by system -->
 			<meta-data
 				android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
-				android:value="60"/>
+				android:value="120"/>
 		</service>
 
 	</application>
